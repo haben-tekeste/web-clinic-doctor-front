@@ -1,8 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
 import Spacer from "../Components/Spacer";
 import AppointmentCard from "../Components/AppointmentCard";
-import { Pressable } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchFutureAppointments,
@@ -18,79 +17,13 @@ const AppointmentScreen = ({ navigation }) => {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(fetchFutureAppointments());
-    dispatch(fetchNearestAppointments());
+    const listener = navigation.addListener("focus", () => {
+      console.log("rn");
+      dispatch(fetchFutureAppointments());
+      dispatch(fetchNearestAppointments());
+    });
+    return listener;
   }, []);
-
-  const td = new Date();
-  const dd = td.getDate();
-  const mm = td.getMonth() + 1;
-  const yyyy = td.getFullYear();
-  const [nearestVisit, setNearestVisit] = useState([
-    {
-      doctor: {
-        name: "Chris Frazier",
-        speciality: "Pediatrician",
-        img: "shorturl.at/uvEPR",
-      },
-      date: `${dd}/${mm}/${yyyy}`,
-      time: "10:30 AM",
-      status: "pending",
-    },
-    {
-      doctor: {
-        name: "Chris Frazier",
-        speciality: "Pediatrician",
-        img: "shorturl.at/uvEPR",
-      },
-      date: `${dd}/${mm}/${yyyy}`,
-      time: "10:30 AM",
-      status: "pending",
-    },
-  ]);
-
-  const [futureVisits, setFutureVisits] = useState([
-    {
-      doctor: {
-        name: "Chris Frazier",
-        speciality: "Pediatrician",
-        img: "shorturl.at/uvEPR",
-      },
-      date: `${dd}/${mm}/${yyyy}`,
-      time: "10:30 AM",
-      status: "pending",
-    },
-    {
-      doctor: {
-        name: "Chris Frazier",
-        speciality: "Pediatrician",
-        img: "shorturl.at/uvEPR",
-      },
-      date: `${dd}/${mm}/${yyyy}`,
-      time: "10:30 AM",
-      status: "pending",
-    },
-    {
-      doctor: {
-        name: "Chris Frazier",
-        speciality: "Pediatrician",
-        img: "shorturl.at/uvEPR",
-      },
-      date: `${dd}/${mm}/${yyyy}`,
-      time: "10:30 AM",
-      status: "pending",
-    },
-    {
-      doctor: {
-        name: "Chris Frazier",
-        speciality: "Pediatrician",
-        img: "shorturl.at/uvEPR",
-      },
-      date: `${dd}/${mm}/${yyyy}`,
-      time: "10:30 AM",
-      status: "pending",
-    },
-  ]);
 
   if (isLoading) {
     return (
@@ -127,6 +60,12 @@ const AppointmentScreen = ({ navigation }) => {
         >
           <Text style={{ fontSize: 15, color: "white" }}>Completed</Text>
         </Pressable>
+        <Pressable
+          style={{ ...ScheduleStyle.btn, backgroundColor: "#640F82" }}
+          onPress={() => navigation.navigate("IncompletedAppointments")}
+        >
+          <Text style={{ fontSize: 15, color: "white" }}>Other</Text>
+        </Pressable>
       </View>
       <View style={{ flex: 1, top: 40 }}>
         <Spacer>
@@ -138,7 +77,7 @@ const AppointmentScreen = ({ navigation }) => {
             showsHorizontalScrollIndicator={false}
             style={{ height: 100 }}
             horizontal
-            data={nearestVisit}
+            data={nearest}
             keyExtractor={(item) => item.date + Math.random()}
             renderItem={({ item }) => {
               return (
@@ -151,7 +90,9 @@ const AppointmentScreen = ({ navigation }) => {
         ) : (
           <View>
             <Spacer>
-              <Text style={{color:"#d23ad1", textAlign:'center'}}>No Appointment in the coming 2 days</Text>
+              <Text style={{ color: "#d23ad1", textAlign: "center" }}>
+                No Appointment in the coming 2 days
+              </Text>
             </Spacer>
             <Spacer />
           </View>
@@ -163,14 +104,16 @@ const AppointmentScreen = ({ navigation }) => {
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={futureVisits}
+            data={future}
             keyExtractor={(item) => item.date + Math.random()}
             renderItem={({ item }) => <AppointmentCard details={item} />}
           />
         ) : (
           <View>
             <Spacer>
-              <Text style={{color:"#d23ad1", textAlign:'center'}}>No Appointments for the future, so far</Text>
+              <Text style={{ color: "#d23ad1", textAlign: "center" }}>
+                No Appointments for the future, so far
+              </Text>
             </Spacer>
           </View>
         )}

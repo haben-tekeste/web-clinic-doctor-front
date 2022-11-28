@@ -1,17 +1,22 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, SafeAreaView, Text, FlatList } from "react-native";
 import AppointmentCard from "../Components/AppointmentCard";
 import Spacer from "../Components/Spacer";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import LottieView from "lottie-react-native";
+import { fetchIncompleteAppointments } from "../Actions/AppointmentsAction";
 
-const CompletedAppointmentsScreen = () => {
-  const { isLoading, all } = useSelector((state) => state.appointments);
+const IncompleteAppointmentsScreen = ({ navigation }) => {
+  const { isLoading, incomplete } = useSelector((state) => state.appointments);
   const animation = useRef(null);
+  const dispatch = useDispatch();
 
-  const completedAppointments = all?.filter(
-    (appointment) => appointment.status === "Completed"
-  );
+  useEffect(() => {
+    const listener = navigation.addListener("focus", () => {
+      dispatch(fetchIncompleteAppointments());
+    });
+    return listener;
+  }, []);
 
   if (isLoading) {
     return (
@@ -42,7 +47,7 @@ const CompletedAppointmentsScreen = () => {
       <FlatList
         horizontal={false}
         showsHorizontalScrollIndicator={false}
-        data={completedAppointments}
+        data={incomplete}
         keyExtractor={(item) => item.date + Math.random()}
         renderItem={({ item }) => <AppointmentCard details={item} />}
       />
@@ -50,4 +55,4 @@ const CompletedAppointmentsScreen = () => {
   );
 };
 
-export default CompletedAppointmentsScreen;
+export default IncompleteAppointmentsScreen;

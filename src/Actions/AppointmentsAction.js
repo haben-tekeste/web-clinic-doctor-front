@@ -58,3 +58,16 @@ export const updateAppointment = (appId) => async (dispatch) => {
     console.log(error);
   }
 };
+
+export const fetchIncompleteAppointments = () => async (dispatch) => {
+  try {
+    const { data } = await api.get("doctor/incompleted-appointments");
+    console.log(data);
+    dispatch({
+      type: "FETCH_INCOMPLETED_APPOINTMENTS",
+      payload: data,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

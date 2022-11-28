@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   Modal,
   TextInput,
+  Alert,
 } from "react-native";
 import {
   Foundation,
@@ -15,27 +16,83 @@ import {
   Octicons,
 } from "@expo/vector-icons";
 import Spacer from "./Spacer";
-import { AntDesign } from '@expo/vector-icons'; 
-import { writePrescription, clearMessage } from "../Actions/PrescriptionActions";
-import { useDispatch,useSelector } from "react-redux";
+import { AntDesign } from "@expo/vector-icons";
+import {
+  writePrescription,
+  clearMessage,
+} from "../Actions/PrescriptionActions";
+import { useDispatch, useSelector } from "react-redux";
+import api from "../Api/api";
+import * as RootNavigation from "../navigationRef";
 
+const AppointmentCard = ({ details, navigation }) => {
+  const dispatch = useDispatch();
 
-const AppointmentCard = ({ details }) => {
-  const dispatch = useDispatch()
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(clearMessage());
-  },[])
-  const {isLoading, message} = useSelector(state => state.prescription)
+  }, []);
+  const { isLoading, message } = useSelector((state) => state.prescription);
+  const { profile } = useSelector((state) => state.profile);
   const { width, height } = useWindowDimensions();
   const [modalVisible, setModalVisible] = useState(false);
   const [medicine, setMedicine] = useState("");
   const [dosage, setDosage] = useState("");
   const [duration, setDuration] = useState(0);
-  const dateDisplay = details?.date.split('T')[0]
+  const dateDisplay = details?.date.split("T")[0];
+  const handleComplete = async () => {
+    try {
+      await api.put("doctor/appointment/" + details.id);
+      Alert.alert("Success", "Appointment updated successfully", [
+        {
+          text: "OK",
+          onPress: () => RootNavigation.navigate("HomeScreen"),
+        },
+      ]);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Appointment can not be marked complete, too early",
+        [{ text: "OK" }]
+      );
+    }
+  };
   const handleWrite = () => {
     if (!medicine || !dosage || duration === 0) return;
-    dispatch(writePrescription(medicine,dosage,duration,details.patientId,details.id));
-  }
+    dispatch(
+      writePrescription(
+        medicine,
+        dosage,
+        duration,
+        details.patientId,
+        details.id
+      )
+    );
+  };
+
+  const handleJoin = () => {
+    const stringDay = new Date(details.date).toLocaleDateString();
+
+    if (stringDay != new Date().toLocaleDateString()) {
+      Alert.alert("Error", "Appointment has not started yet", [{ text: "OK" }]);
+      return;
+    } else {
+      const time = new Date(details.date).getTime();
+      const timeNow = new Date();
+      const hours = 1000 * 60 * 60;
+      const timeDifference = time / hours - timeNow / hours - 4;
+
+      if (!(timeDifference <= 0 && timeDifference > -1)) {
+        Alert.alert("Error", "Appointment has not started", [{ text: "OK" }]);
+        return;
+      }
+    }
+    RootNavigation.navigate("Chat", {
+      appointmentId: details.id,
+      patientId: details.patientId,
+      doctorId: profile.id,
+    });
+  };
+
   return (
     <View
       style={{
@@ -78,25 +135,37 @@ const AppointmentCard = ({ details }) => {
           <Text style={{ marginLeft: 5 }}>{details.time}</Text>
         </View>
         <View style={cardStyles.icon}>
-          <Octicons name="dot-fill" size={30} color={details?.status == "Confirmed" ? "#45f60a" : "red"} />
+          <Octicons
+            name="dot-fill"
+            size={30}
+            color={details?.status == "Completed" ? "#45f60a" : "gold"}
+          />
           <Text style={{ marginLeft: 5 }}>{details?.status}</Text>
         </View>
       </View>
       <View style={cardStyles.buttonContainer}>
-        {details.status === "pending" ? (
-          <Pressable style={{ ...cardStyles.btn, backgroundColor: "#dcdedc" }}>
-            <Text style={{ fontSize: 15 }}>Mark Complete</Text>
-          </Pressable>
-        ) : details?.status === 'Confirmed' && (
+        {details.status === "Pending" ? (
           <Pressable
             style={{ ...cardStyles.btn, backgroundColor: "#dcdedc" }}
-            onPress={() => setModalVisible(true)}
+            onPress={handleComplete}
           >
-            <Text style={{ fontSize: 15 }}>Write Prescription</Text>
+            <Text style={{ fontSize: 15 }}>Mark Complete</Text>
           </Pressable>
+        ) : (
+          details?.status === "Completed" && (
+            <Pressable
+              style={{ ...cardStyles.btn, backgroundColor: "#dcdedc" }}
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={{ fontSize: 15 }}>Write Prescription</Text>
+            </Pressable>
+          )
         )}
 
-        <Pressable style={{ ...cardStyles.btn, backgroundColor: "#640F82" }}>
+        <Pressable
+          style={{ ...cardStyles.btn, backgroundColor: "#640F82" }}
+          onPress={handleJoin}
+        >
           <Text style={{ fontSize: 15, color: "white" }}>Join</Text>
         </Pressable>
       </View>
@@ -117,8 +186,8 @@ const AppointmentCard = ({ details }) => {
               height: height / 2,
             }}
           >
-          <Spacer />
-          <Spacer />
+            <Spacer />
+            <Spacer />
             <TextInput
               style={cardStyles.input}
               onChangeText={setMedicine}
@@ -141,24 +210,31 @@ const AppointmentCard = ({ details }) => {
             />
             <Spacer />
             <Pressable
-              style={[cardStyles.button,cardStyles.cancel]}
+              style={[cardStyles.button, cardStyles.cancel]}
               onPress={() => {
-                dispatch(clearMessage())
-                setModalVisible(!modalVisible)}
-                } 
+                dispatch(clearMessage());
+                setModalVisible(!modalVisible);
+              }}
             >
               <AntDesign name="closecircleo" size={24} color="black" />
             </Pressable>
             <Pressable
-              style={[cardStyles.button,cardStyles.buttonClose]}
-              onPress={() => 
-                setModalVisible(!modalVisible) }
+              style={[cardStyles.button, cardStyles.buttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}
             >
-              <Text style={{fontSize:18,padding:7}} onPress={handleWrite}>Write</Text>
+              <Text style={{ fontSize: 18, padding: 7 }} onPress={handleWrite}>
+                Write
+              </Text>
             </Pressable>
             <Spacer />
             <Spacer />
-            {message && <Text style={{textAlign:'center',color:'blue',fontSize:15}}>{message}</Text>}
+            {message && (
+              <Text
+                style={{ textAlign: "center", color: "blue", fontSize: 15 }}
+              >
+                {message}
+              </Text>
+            )}
           </View>
         </View>
       </Modal>
@@ -171,7 +247,7 @@ const cardStyles = StyleSheet.create({
     padding: 8,
     borderRadius: 10,
     marginHorizontal: 8,
-    marginVertical:6,
+    marginVertical: 6,
     backgroundColor: "#ede5ee",
     shadowColor: "#171717",
     shadowOffset: {
@@ -268,16 +344,16 @@ const cardStyles = StyleSheet.create({
     margin: 12,
     borderWidth: 1,
     padding: 10,
-    borderRadius:4,
+    borderRadius: 4,
     width: 250,
-    fontSize:20
+    fontSize: 20,
   },
-  cancel:{
-    backgroundColor:'#f06666',
-    position:'absolute',
-    top:0,
-    right:2
-  }
+  cancel: {
+    backgroundColor: "#f06666",
+    position: "absolute",
+    top: 0,
+    right: 2,
+  },
 });
 
 export default AppointmentCard;

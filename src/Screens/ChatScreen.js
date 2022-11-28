@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState,useEffect } from "react";
+import React, { useLayoutEffect, useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -11,31 +11,45 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import MessageComponent from "../Components/MessageComponent";
 import socket from "../socket";
 import { useSelector } from "react-redux";
+import api from "../Api/api";
 
 const ChatScreen = ({ route, navigation }) => {
-  const {isLoading,profile} = useSelector(state => state.profile)
+  const { isLoading, profile } = useSelector((state) => state.profile);
+  const { appointmentId, patientId, doctorId } = route.params;
+  useEffect(()=>{
+    console.log(patientId, doctorId,"print")
+    const fetchData = async() => {
+      try {
+        const data = await api.get('doctor/chat',{
+          patientId,
+          doctorId
+        })
+        console.log(data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    fetchData();
+  })
   useEffect(() => {
-    socket.emit('join-room',{roomId:1,name:profile?.name})
-  },[socket])
+    socket.emit("join-room", { roomId: appointmentId, name: profile?.name });
+  }, [socket]);
 
   useEffect(() => {
-    socket.on("recieve-message",({msg,time,user})=>{
+    socket.on("recieve-message", ({ msg, time, user }) => {
       setChatMessages((prev) => [
         ...prev,
         {
           id: "2",
           text: msg,
           time,
-          user
+          user,
         },
       ]);
-    })
-  },[socket])
+    });
+  }, [socket]);
 
-
-  const [chatMessages, setChatMessages] = useState([
-   
-  ]);
+  const [chatMessages, setChatMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [user, setUser] = useState(profile?.name);
 
@@ -81,11 +95,17 @@ const ChatScreen = ({ route, navigation }) => {
         id: "2",
         text: message,
         time: `${hour}:${mins}`,
-        user
+        user,
       },
     ]);
-    socket.emit('send-message',{room:1,msg:message,name:user})
-    
+    socket.emit("send-message", {
+      room: appointmentId,
+      msg: message,
+      name: user,
+      doctorId,
+      patientId,
+    });
+
     // console.log({
     //   message,
     //   user,
@@ -107,7 +127,7 @@ const ChatScreen = ({ route, navigation }) => {
             renderItem={({ item }) => (
               <MessageComponent item={item} user={user} />
             )}
-            keyExtractor={(item,index) => index}
+            keyExtractor={(item, index) => index}
           />
         ) : (
           ""

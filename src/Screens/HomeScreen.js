@@ -1,4 +1,4 @@
-import React, {  useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -20,14 +20,19 @@ import { fetchReviews } from "../Actions/ReviewsAction";
 import { useDispatch, useSelector } from "react-redux";
 import LottieView from "lottie-react-native";
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const animation = useRef(null);
   useEffect(() => {
-    dispatch(fetchProfile())
-    dispatch(fetchReviews());
-    dispatch(fetchTodayAppointments());
-    dispatch(fetchAllAppointments());
+    dispatch(fetchProfile());
+  }, []);
+  useEffect(() => {
+    const listener = navigation.addListener("focus", () => {
+      dispatch(fetchReviews());
+      dispatch(fetchTodayAppointments());
+      dispatch(fetchAllAppointments());
+    });
+    return listener;
   }, []);
   const { isLoading, today } = useSelector((state) => state.appointments);
   const reviews = useSelector((state) => state.reviews);

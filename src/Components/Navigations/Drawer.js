@@ -79,17 +79,7 @@ export default () => {
           ),
         }}
       />
-      <Drawer.Screen
-        name="Chat"
-        component={ChatScreen}
-        options={{
-          headerTitle: "",
-          headerStyle: { backgroundColor: "#F7EEFF" },
-          drawerIcon: ({ color }) => (
-            <Ionicons name="person" size={24} color={color} />
-          ),
-        }}
-      />
+      
     </Drawer.Navigator>
   );
 };

@@ -6,6 +6,8 @@ import LoaderScreen from "../../Screens/LoaderScreen";
 import SignOutScreen from "../../Screens/SignOutScreen";
 import Drawer from "./Drawer";
 import CompletedAppointmentsScreen from "../../Screens/CompletedAppointmentsScreen";
+import IncompleteAppointmentsScreen from "../../Screens/IncompleteAppointmentsScreen";
+import ChatScreen from "../../Screens/ChatScreen";
 
 export default () => {
   const Stack = createNativeStackNavigator();
@@ -44,6 +46,30 @@ export default () => {
         component={CompletedAppointmentsScreen}
         options={{
           headerTitle: "Completed Appointments",
+          headerStyle: {
+            backgroundColor: "#F7EEFF",
+          },
+          headerShadowVisible: false,
+          headerTintColor: "black",
+        }}
+      />
+      <Stack.Screen
+        name="IncompletedAppointments"
+        component={IncompleteAppointmentsScreen}
+        options={{
+          headerTitle: "Incompleted Appointments",
+          headerStyle: {
+            backgroundColor: "#F7EEFF",
+          },
+          headerShadowVisible: false,
+          headerTintColor: "black",
+        }}
+      />
+      <Stack.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={{
+          headerTitle: "Chat",
           headerStyle: {
             backgroundColor: "#F7EEFF",
           },

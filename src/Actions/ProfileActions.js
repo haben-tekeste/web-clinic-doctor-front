@@ -9,7 +9,8 @@ export const fetchProfile = () => async(dispatch) => {
             payload:{
                 name:data.name,
                 email:data.email,
-                img:data.imageUrl
+                img:data.imageUrl,
+                id:data.id
             }
         })
     } catch (error) {
