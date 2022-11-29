@@ -18,7 +18,6 @@ const AppointmentScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   useEffect(() => {
     const listener = navigation.addListener("focus", () => {
-      console.log("rn");
       dispatch(fetchFutureAppointments());
       dispatch(fetchNearestAppointments());
     });

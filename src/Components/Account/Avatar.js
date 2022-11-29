@@ -26,7 +26,7 @@ export default ({ navigation, profile }) => {
       >
         <Image
           source={{
-            uri: "https://66d5-195-229-151-165.ap.ngrok.io/" + profile.img,
+            uri: "https://f6d8-195-229-151-165.ap.ngrok.io/" + profile.img,
           }}
           style={{
             width: 180,
